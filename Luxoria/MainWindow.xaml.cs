@@ -15,7 +15,6 @@ namespace Luxoria
     {
         private uint rgba;
 
-        // Constructors
         public Color(uint rgba) => this.rgba = rgba;
 
         public Color(byte r, byte g, byte b, byte a = 255)
@@ -35,14 +34,12 @@ namespace Luxoria
             rgba = uint.Parse(hex, NumberStyles.HexNumber);
         }
 
-        // Properties
         public uint Rgba => rgba;
         public byte R => (byte)((rgba >> 24) & 0xFF);
         public byte G => (byte)((rgba >> 16) & 0xFF);
         public byte B => (byte)((rgba >> 8) & 0xFF);
         public byte A => (byte)(rgba & 0xFF);
 
-        // Conversion methods
         public (float H, float S, float B) ToHSB()
         {
             float r = R / 255f;
@@ -57,7 +54,7 @@ namespace Luxoria
 
             if (max == min)
             {
-                h = 0; // achromatic
+                h = 0;
             }
             else
             {
@@ -76,12 +73,12 @@ namespace Luxoria
                 h /= 6;
             }
 
-            return (h * 360, s, v); // H is in degrees
+            return (h * 360, s, v);
         }
 
         public static Color FromHSL(float h, float s, float l, float alpha = 1.0f)
         {
-            h = h % 360; // Ensure h is within [0, 360]
+            h = h % 360;
             s = Math.Clamp(s, 0.0f, 1.0f);
             l = Math.Clamp(l, 0.0f, 1.0f);
 
@@ -107,7 +104,7 @@ namespace Luxoria
 
         public static Color FromHSB(float h, float s, float b, float alpha = 1.0f)
         {
-            h = h % 360; // Ensure h is within [0, 360]
+            h = h % 360;
             s = Math.Clamp(s, 0.0f, 1.0f);
             b = Math.Clamp(b, 0.0f, 1.0f);
 
@@ -144,7 +141,7 @@ namespace Luxoria
 
             if (max == min)
             {
-                h = s = 0; // achromatic
+                h = s = 0;
             }
             else
             {
@@ -165,10 +162,9 @@ namespace Luxoria
                 h /= 6;
             }
 
-            return (h * 360, s, l); // H is in degrees
+            return (h * 360, s, l);
         }
 
-        // Equality and hashing
         public bool Equals(Color other) => rgba == other.rgba;
         public override bool Equals(object obj) => obj is Color other && Equals(other);
         public override int GetHashCode() => rgba.GetHashCode();
@@ -215,6 +211,10 @@ namespace Luxoria
         {
             if (originalImage != null)
             {
+                WriteableBitmap exportImage = new WriteableBitmap(originalImage);
+
+                ApplyAdjustmentsToImage(exportImage);
+
                 SaveFileDialog saveFileDialog = new SaveFileDialog
                 {
                     Filter = "JPEG Image (*.jpeg;*.jpg)|*.jpeg;*.jpg|PNG Image (*.png)|*.png|Bitmap Image (*.bmp)|*.bmp",
@@ -241,7 +241,7 @@ namespace Luxoria
                             break;
                     }
 
-                    encoder.Frames.Add(BitmapFrame.Create((BitmapSource)img.Source));
+                    encoder.Frames.Add(BitmapFrame.Create(exportImage));
 
                     using (var fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create))
                     {
@@ -249,6 +249,33 @@ namespace Luxoria
                     }
                 }
             }
+        }
+
+        private void ApplyAdjustmentsToImage(WriteableBitmap image)
+        {
+            int width = image.PixelWidth;
+            int height = image.PixelHeight;
+            int stride = width * ((image.Format.BitsPerPixel + 7) / 8);
+            byte[] pixelData = new byte[height * stride];
+            image.CopyPixels(pixelData, stride, 0);
+
+            for (int i = 0; i < pixelData.Length; i += 4)
+            {
+                byte b = pixelData[i];
+                byte g = pixelData[i + 1];
+                byte r = pixelData[i + 2];
+                byte a = pixelData[i + 3];
+
+                Color originalColor = new Color(r, g, b, a);
+                Color adjustedColor = AdjustColor(originalColor);
+
+                pixelData[i] = adjustedColor.B;
+                pixelData[i + 1] = adjustedColor.G;
+                pixelData[i + 2] = adjustedColor.R;
+                pixelData[i + 3] = adjustedColor.A;
+            }
+
+            image.WritePixels(new Int32Rect(0, 0, width, height), pixelData, stride, 0);
         }
 
         private void AdjustImage()
@@ -283,9 +310,9 @@ namespace Luxoria
         private Color AdjustColor(Color color)
         {
             var hsl = color.ToHSB();
-            hsl.H += (float)currentTintFactor; // Adjust hue
-            hsl.S *= (float)currentSaturationFactor; // Adjust saturation
-            hsl.B = Math.Min(1.0f, hsl.B * (float)Math.Pow(2, currentExposureFactor)); // Adjust lightness with exposure
+            hsl.H += (float)currentTintFactor;
+            hsl.S *= (float)currentSaturationFactor;
+            hsl.B = Math.Min(1.0f, hsl.B * (float)Math.Pow(2, currentExposureFactor));
 
             return Color.FromHSB(hsl.H, hsl.S, hsl.B);
         }
