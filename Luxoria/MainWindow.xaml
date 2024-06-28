@@ -23,5 +23,6 @@
 
         <Label Content="Tint" HorizontalAlignment="Left" Margin="1270,1040,0,0" VerticalAlignment="Top"/>
         <Slider x:Name="SliderTint" HorizontalAlignment="Left" Margin="1270,1070,0,0" VerticalAlignment="Top" Width="400" ValueChanged="TintSlider_ValueChanged" Value="0" Minimum="0" Maximum="360" TickFrequency="0.05" IsSnapToTickEnabled="True" Height="30"/>
+        <Button Content="WebExport" HorizontalAlignment="Right" Margin="0,42,10,0" VerticalAlignment="Top" Width="75" Click="WebExportButton_Click"/>
     </Grid>
 </Window>

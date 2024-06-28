@@ -1,16 +1,14 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.IO;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Luxoria
 {
-    using System;
-    using System.Globalization;
-    using System.Text.RegularExpressions;
-
     public struct Color : IEquatable<Color>
     {
         private uint rgba;
@@ -172,8 +170,62 @@ namespace Luxoria
         public static bool operator !=(Color left, Color right) => !left.Equals(right);
         public override string ToString() => $"Color(R: {R}, G: {G}, B: {B}, A: {A})";
     }
+
+    public class ImageUploader
+    {
+        private static readonly HttpClient client = new HttpClient();
+
+        public static async Task UploadWriteableBitmapAsync(string url, WriteableBitmap writeableBitmap)
+        {
+            try
+            {
+                using (var content = new MultipartFormDataContent())
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        BitmapEncoder encoder = new JpegBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(writeableBitmap));
+                        encoder.Save(stream);
+                        stream.Seek(0, SeekOrigin.Begin);
+
+                        var fileContent = new StreamContent(stream);
+                        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+                        fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                        {
+                            Name = "\"file\"",
+                            FileName = "\"image.jpg\""
+                        };
+
+                        content.Add(fileContent);
+                        Console.WriteLine($"Content-Type: {content.Headers.ContentType}");
+
+                        var response = await client.PostAsync(url, content);
+                        var responseContent = await response.Content.ReadAsStringAsync();
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            Console.WriteLine("Image uploaded successfully.");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Image upload failed. Status code: {response.StatusCode}");
+                            Console.WriteLine($"Response content: {responseContent}");
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
+    }
+
     public partial class MainWindow : Window
     {
+        string API_URL = "http://localhost:3000";
+            
         private BitmapImage originalImage;
         private BitmapImage compressedImage;
         private double currentSaturationFactor = 1;
@@ -353,6 +405,20 @@ namespace Luxoria
 
             img.Source = compressedImage;
             AdjustImage();
+        }
+
+        private async void WebExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = API_URL + "/api/upload";
+
+            if (originalImage != null)
+            {
+                WriteableBitmap exportImage = new WriteableBitmap(originalImage);
+
+                ApplyAdjustmentsToImage(exportImage);
+
+                await ImageUploader.UploadWriteableBitmapAsync(url, exportImage);
+            }
         }
     }
 }
