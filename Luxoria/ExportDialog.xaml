@@ -1,0 +1,16 @@
+﻿<Window x:Class="Luxoria.ExportOptionsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Export Options" Height="300" Width="400">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
+        <ComboBox x:Name="cmbExportType" Width="200" Margin="10"
+                  SelectionChanged="CmbExportType_SelectionChanged">
+            <ComboBoxItem Content="Web Export"/>
+            <ComboBoxItem Content="Basic Export"/>
+        </ComboBox>
+        <StackPanel x:Name="panelOptions" Margin="10">
+            <!-- Les options spécifiques seront ajoutées ici dynamiquement -->
+        </StackPanel>
+        <Button Content="Export" Width="100" Margin="20" Click="Export_Click"/>
+    </StackPanel>
+</Window>

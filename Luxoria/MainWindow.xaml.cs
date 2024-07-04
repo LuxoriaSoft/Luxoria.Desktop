@@ -175,12 +175,20 @@ namespace Luxoria
     {
         private static readonly HttpClient client = new HttpClient();
 
-        public static async Task UploadWriteableBitmapAsync(string url, WriteableBitmap writeableBitmap)
+        public static async Task UploadWriteableBitmapAsync(string url, WriteableBitmap writeableBitmap, string galleryId, string fileName)
         {
             try
             {
                 using (var content = new MultipartFormDataContent())
                 {
+                    // Add the relatedToGallery field
+                    var galleryIdContent = new StringContent(galleryId);
+                    galleryIdContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                    {
+                        Name = "\"relatedToGallery\""
+                    };
+                    content.Add(galleryIdContent);
+
                     using (var stream = new MemoryStream())
                     {
                         BitmapEncoder encoder = new JpegBitmapEncoder();
@@ -193,7 +201,7 @@ namespace Luxoria
                         fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
                         {
                             Name = "\"file\"",
-                            FileName = "\"image.jpg\""
+                            FileName = fileName,
                         };
 
                         content.Add(fileContent);
@@ -213,7 +221,6 @@ namespace Luxoria
                         }
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -222,7 +229,7 @@ namespace Luxoria
         }
     }
 
-    public partial class MainWindow : Window
+        public partial class MainWindow : Window
     {
         string API_URL = "http://localhost:3000";
             
@@ -231,6 +238,8 @@ namespace Luxoria
         private double currentSaturationFactor = 1;
         private double currentTintFactor = 0;
         private double currentExposureFactor = 0;
+        private string fileName = "";
+        private Gallery selectedGallery;
 
         public MainWindow()
         {
@@ -247,6 +256,7 @@ namespace Luxoria
             if (openFileDialog.ShowDialog() == true)
             {
                 originalImage = new BitmapImage(new Uri(openFileDialog.FileName));
+                fileName = System.IO.Path.GetFileNameWithoutExtension(openFileDialog.FileName);
 
                 compressedImage = new BitmapImage();
                 compressedImage.BeginInit();
@@ -259,7 +269,7 @@ namespace Luxoria
             }
         }
 
-        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        private void BasicExportButton_Click(object sender, RoutedEventArgs e)
         {
             if (originalImage != null)
             {
@@ -407,9 +417,11 @@ namespace Luxoria
             AdjustImage();
         }
 
-        private async void WebExportButton_Click(object sender, RoutedEventArgs e)
+        private async void WebExportButton_Click(object sender, RoutedEventArgs e, String galleryId, string fileName)
         {
             string url = API_URL + "/api/upload";
+
+            MessageBox.Show("Exporting image to web... | GalleryID: " + galleryId);
 
             if (originalImage != null)
             {
@@ -417,8 +429,26 @@ namespace Luxoria
 
                 ApplyAdjustmentsToImage(exportImage);
 
-                await ImageUploader.UploadWriteableBitmapAsync(url, exportImage);
+                await ImageUploader.UploadWriteableBitmapAsync(url, exportImage, galleryId, fileName);
             }
         }
+
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new ExportOptionsDialog(fileName);
+            if (dialog.ShowDialog() == true)
+            {
+                switch (dialog.SelectedExportType)
+                {
+                    case "Web Export":
+                        WebExportButton_Click(sender, e, dialog.SelectedGallery.Id, fileName);
+                        break;
+                    case "Basic Export":
+                        BasicExportButton_Click(sender, e);
+                        break;
+                }
+            }
+        }
+
     }
 }
