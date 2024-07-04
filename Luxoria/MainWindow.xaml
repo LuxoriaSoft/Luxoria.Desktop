@@ -12,7 +12,6 @@
         ResizeMode="CanResizeWithGrip">
 
     <Window.Resources>
-        <!-- Style pour les boutons -->
         <Style TargetType="Button">
             <Setter Property="Background" Value="#007ACC"/>
             <Setter Property="Foreground" Value="White"/>
