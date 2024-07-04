@@ -5,25 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Luxoria"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1200" Width="1920">
+        Title="MainWindow" WindowState="Maximized">
 
     <Grid>
-        <Button Content="Import" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Click="ImportButton_Click"/>
-        <Image x:Name="img" HorizontalAlignment="Right" Height="1000" Margin="0,30,40,0" VerticalAlignment="Top" Width="1840"/>
-        <Button Content="Export" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="75" Click="ExportButton_Click"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
 
-        <Label Content="Compression" HorizontalAlignment="Left" Margin="10,1040,0,0" VerticalAlignment="Top"/>
-        <Slider x:Name="SliderCompression" HorizontalAlignment="Left" Margin="10,1070,0,0" VerticalAlignment="Top" Width="400" ValueChanged="CompressorSlider_ValueChanged" Value="10" Minimum="1" Maximum="100" Height="30"/>
+        <Button Content="Import" Grid.Row="0" Grid.Column="0" Margin="10" VerticalAlignment="Top" Width="75" Click="ImportButton_Click"/>
+        <Button Content="Export" Grid.Row="0" Grid.Column="5" Margin="10" VerticalAlignment="Top" Width="75" Click="ExportButton_Click"/>
 
-        <Label Content="Exposure" HorizontalAlignment="Left" Margin="430,1040,0,0" VerticalAlignment="Top"/>
-        <Slider x:Name="SliderExposure" HorizontalAlignment="Left" Margin="430,1070,0,0" VerticalAlignment="Top" Width="400" ValueChanged="ExposureSlider_ValueChanged" Height="30" Minimum="-3" Maximum="3" Value="0" TickFrequency="0.1" IsSnapToTickEnabled="True"/>
+        <Image x:Name="img" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"/>
 
-        <Label Content="Saturation" HorizontalAlignment="Left" Margin="850,1040,0,0" VerticalAlignment="Top"/>
-        <Slider x:Name="SliderSaturation" HorizontalAlignment="Left" Margin="850,1070,0,0" VerticalAlignment="Top" Width="400" ValueChanged="SaturationSlider_ValueChanged" Value="50" Minimum="1" Maximum="100" Height="30"/>
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="10" VerticalAlignment="Top">
+            <Label Content="Compression" VerticalAlignment="Center"/>
+            <Slider x:Name="SliderCompression" Margin="0,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Stretch" ValueChanged="CompressorSlider_ValueChanged" Value="10" Minimum="1" Maximum="100" Height="30"/>
+        </StackPanel>
 
-        <Label Content="Tint" HorizontalAlignment="Left" Margin="1270,1040,0,0" VerticalAlignment="Top"/>
-        <Slider x:Name="SliderTint" HorizontalAlignment="Left" Margin="1270,1070,0,0" VerticalAlignment="Top" Width="400" ValueChanged="TintSlider_ValueChanged" Value="0" Minimum="0" Maximum="360" TickFrequency="0.05" IsSnapToTickEnabled="True" Height="30"/>
+        <StackPanel Grid.Row="2" Grid.Column="2" Margin="10" VerticalAlignment="Top">
+            <Label Content="Exposure" VerticalAlignment="Center"/>
+            <Slider x:Name="SliderExposure" Margin="0,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Stretch" ValueChanged="ExposureSlider_ValueChanged" Minimum="-3" Maximum="3" Value="0" TickFrequency="0.1" IsSnapToTickEnabled="True" Height="30"/>
+        </StackPanel>
 
+        <StackPanel Grid.Row="2" Grid.Column="3" Margin="10" VerticalAlignment="Top">
+            <Label Content="Saturation" VerticalAlignment="Center"/>
+            <Slider x:Name="SliderSaturation" Margin="0,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Stretch" ValueChanged="SaturationSlider_ValueChanged" Value="50" Minimum="1" Maximum="100" Height="30"/>
+        </StackPanel>
 
+        <StackPanel Grid.Row="2" Grid.Column="4" Margin="10" VerticalAlignment="Top">
+            <Label Content="Tint" VerticalAlignment="Center"/>
+            <Slider x:Name="SliderTint" Margin="0,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Stretch" ValueChanged="TintSlider_ValueChanged" Value="0" Minimum="0" Maximum="360" TickFrequency="0.05" IsSnapToTickEnabled="True" Height="30"/>
+        </StackPanel>
     </Grid>
 </Window>
